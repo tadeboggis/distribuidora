@@ -1,0 +1,70 @@
+/* 1. Importa fuente Inter si la tenés instalada vía npm */
+@import "@fontsource/inter";
+
+/* 2. Tailwind base + componentes + utilidades */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 3. Overrides base */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-gray-50 text-gray-800 antialiased font-sans;
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+  }
+  a {
+    @apply text-accent hover:text-accent-dark no-underline underline-offset-2;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold text-primary;
+  }
+  button {
+    @apply rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition;
+  }
+  input {
+    @apply border rounded-lg p-3 focus:ring-accent focus:ring-2;
+  }
+}
+
+/* 4. Estilos para impresión */
+@media print {
+  body {
+    @apply bg-white text-black;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  /* Define área imprimible estilo A4 */
+  .print-a4 {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 20mm;
+    background: white;
+    page-break-after: always;
+  }
+
+  /* NUEVA CLASE para centrar contenido impreso sin depender de Tailwind */
+  .print-wrapper {
+    width: 800px;
+    margin: 0 auto;
+    text-align: left;
+  }
+
+  /* Oculta botones, headers, footers y cualquier acción */
+  .no-print,
+  header,
+  footer,
+  button {
+    display: none !important;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+}

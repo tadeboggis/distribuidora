@@ -108,9 +108,25 @@ export function NuevaVenta() {
   }
 
   useEffect(() => {
-    const stored = localStorage.getItem('catalogo')
-    if (stored) {
-      setCatalogo(JSON.parse(stored))
+    const cargarCatalogo = () => {
+      const stored = localStorage.getItem('catalogo')
+      if (stored) {
+        setCatalogo(JSON.parse(stored))
+      }
+    }
+
+    cargarCatalogo()
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        cargarCatalogo()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
     }
   }, [])
 

@@ -29,96 +29,76 @@ export function NuevaVenta() {
   const handlePrint = () => {
     if (comprobanteRef.current) {
       const printWindow = window.open('', '_blank', 'width=900,height=650')
-      const styles = Array.from(document.querySelectorAll('style')).map(s => s.innerHTML).join('\n')
 
       if (printWindow) {
         printWindow.document.write(`
           <html>
             <head>
               <title>Comprobante</title>
-              <style>${styles}</style>
               <style>
+                @page { size: A4; margin: 20mm; }
                 html, body {
                   margin: 0;
                   padding: 0;
-                  height: 100%;
                   font-family: Arial, sans-serif;
-                  font-size: 14px;
+                  font-size: 13px;
                   background: white;
                 }
-
-                body {
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  padding: 30mm 20mm;
-                  box-sizing: border-box;
-                }
-
-                .comprobante-wrapper {
+                .wrapper {
                   width: 100%;
                   max-width: 800px;
-                  page-break-after: always;
+                  margin: 0 auto;
                 }
-
                 h1 {
-                  font-size: 24px;
-                  margin-bottom: 4px;
+                  font-size: 22px;
                   text-align: center;
+                  margin: 0 0 6px 0;
                 }
-
                 .subtitulo {
-                  font-size: 13px;
-                  color: #666;
                   text-align: center;
-                  margin-bottom: 20px;
+                  font-size: 13px;
                   font-style: italic;
+                  color: #666;
+                  margin-bottom: 20px;
                 }
-
                 .datos {
                   display: flex;
                   justify-content: space-between;
-                  font-size: 13px;
-                  margin-bottom: 15px;
+                  font-size: 12px;
+                  margin-bottom: 10px;
                 }
-
                 table {
                   width: 100%;
                   border-collapse: collapse;
-                  margin-bottom: 30px;
+                  margin-bottom: 20px;
                 }
-
                 th, td {
                   border: 1px solid #ccc;
                   padding: 8px;
                   font-size: 13px;
-                  text-align: left;
                 }
-
                 th {
-                  background: #f2f2f2;
+                  background: #f5f5f5;
                 }
-
                 .totales {
-                  font-size: 16px;
-                  font-weight: bold;
                   display: flex;
                   justify-content: space-between;
-                  margin-top: 20px;
-                  margin-bottom: 30px;
-                  padding-top: 10px;
+                  font-weight: bold;
+                  font-size: 16px;
+                  margin-top: 30px;
                   border-top: 2px solid #000;
+                  padding-top: 10px;
                 }
-
                 .footer {
                   text-align: center;
                   font-size: 12px;
-                  color: #444;
+                  color: #666;
+                  margin-top: 40px;
                 }
               </style>
             </head>
             <body>
-              <div class="comprobante-wrapper">
+              <div class="wrapper">
                 ${comprobanteRef.current.innerHTML}
               </div>
               <script>

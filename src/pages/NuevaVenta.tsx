@@ -38,20 +38,25 @@ export function NuevaVenta() {
               <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
               <style>
                 @page { size: A4; margin: 25mm; }
-                body {
+                html, body {
                   background: white;
                   padding: 0;
                   margin: 0;
                 }
+                .no-print-shadow {
+                  box-shadow: none !important;
+                }
               </style>
             </head>
             <body>
-              <div class="max-w-2xl mx-auto text-black text-sm">
-                ${comprobanteRef.current.innerHTML}
-                <div class="text-center text-xs text-gray-500 mt-12">
+              <main class="w-full px-12 pt-12">
+                <div class="text-black text-sm">
+                  ${comprobanteRef.current.innerHTML}
+                </div>
+                <div class="text-center text-xs text-gray-500 mt-16">
                   Sistema desarrollado por <strong>Bortiz Digital</strong>
                 </div>
-              </div>
+              </main>
               <script>
                 window.onload = function() {
                   window.print();

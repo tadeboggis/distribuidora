@@ -42,18 +42,73 @@ export function NuevaVenta() {
                   margin: 0;
                   padding: 0;
                   height: 100%;
-                  font-family: sans-serif;
-                  font-size: 13px;
+                  font-family: Arial, sans-serif;
+                  font-size: 14px;
                   background: white;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
                 }
+
+                body {
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  padding: 40mm 20mm;
+                  box-sizing: border-box;
+                }
+
                 .comprobante-wrapper {
-                  width: 210mm;
-                  min-height: 297mm;
-                  padding: 30mm;
-                  box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.1);
+                  width: 100%;
+                  max-width: 800px;
+                  page-break-after: always;
+                }
+
+                h1 {
+                  font-size: 22px;
+                  margin-bottom: 5px;
+                  text-align: center;
+                }
+
+                .subtitulo {
+                  font-size: 13px;
+                  color: #666;
+                  text-align: center;
+                  margin-bottom: 25px;
+                  font-style: italic;
+                }
+
+                .datos {
+                  display: flex;
+                  justify-content: space-between;
+                  margin-bottom: 10px;
+                }
+
+                table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin-bottom: 20px;
+                }
+
+                th, td {
+                  border: 1px solid #000;
+                  padding: 8px;
+                  font-size: 13px;
+                }
+
+                th {
+                  background: #f5f5f5;
+                }
+
+                .totales {
+                  display: flex;
+                  justify-content: space-between;
+                  font-weight: bold;
+                  font-size: 15px;
+                  margin-bottom: 30px;
+                }
+
+                .footer {
+                  text-align: center;
+                  font-size: 12px;
+                  color: #555;
                 }
               </style>
             </head>

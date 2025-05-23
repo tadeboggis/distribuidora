@@ -19,7 +19,7 @@ export const VistaPreviaComprobante = forwardRef<HTMLDivElement, VistaPreviaComp
     return (
       <div
         ref={ref}
-        className="bg-white p-8 mt-12 text-sm text-black shadow-md rounded-xl print:w-[800px] print:mx-auto print:shadow-none print:rounded-none print:mt-0"
+        className="bg-white p-8 mt-12 text-sm text-black shadow-md rounded-xl print-a4 print-wrapper print:shadow-none print:rounded-none print:mt-0"
       >
         <h1 className="text-2xl font-bold text-center mb-1">Distribuidora de Bebidas</h1>
         <p className="text-center italic text-gray-600 mb-4">Este documento no es válido como factura</p>
@@ -76,3 +76,5 @@ export const VistaPreviaComprobante = forwardRef<HTMLDivElement, VistaPreviaComp
     )
   }
 )
+
+VistaPreviaComprobante.displayName = 'VistaPreviaComprobante'

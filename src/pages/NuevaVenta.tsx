@@ -29,92 +29,36 @@ export function NuevaVenta() {
   const handlePrint = () => {
     if (comprobanteRef.current) {
       const printWindow = window.open('', '_blank', 'width=900,height=650')
+      const styles = Array.from(document.querySelectorAll('style')).map(s => s.innerHTML).join('\n')
 
       if (printWindow) {
         printWindow.document.write(`
           <html>
             <head>
               <title>Comprobante</title>
+              <style>${styles}</style>
               <style>
-                @page { size: A4; margin: 20mm; }
+                @page { size: A4; margin: 25mm; }
                 html, body {
                   margin: 0;
                   padding: 0;
-                  font-family: Arial, sans-serif;
-                  font-size: 13px;
                   background: white;
                 }
-                .wrapper {
-                  width: 100%;
-                  max-width: 800px;
+                .print-wrapper {
+                  width: 800px;
                   margin: 0 auto;
                 }
-                h1 {
-                  font-size: 24px;
-                  text-align: center;
-                  margin: 0 0 8px 0;
-                }
-                .subtitulo {
-                  text-align: center;
-                  font-size: 13px;
-                  font-style: italic;
-                  color: #666;
-                  margin-bottom: 25px;
-                }
-                .datos {
-                  display: flex;
-                  justify-content: space-between;
-                  font-size: 13px;
-                  margin-bottom: 25px;
-                  font-weight: bold;
-                }
-                table {
-                  width: 100%;
-                  border-collapse: collapse;
-                  margin-bottom: 30px;
-                }
-                th, td {
-                  border: 1px solid #ccc;
-                  padding: 10px;
-                  font-size: 13px;
-                }
-                th {
-                  background: #f0f0f0;
-                }
-                tbody tr:not(:last-child) {
-                  border-bottom: 2px solid #eee;
-                }
-                .totales {
-                  display: flex;
-                  justify-content: space-between;
-                  font-weight: bold;
-                  font-size: 16px;
-                  margin-top: 40px;
-                  padding-top: 10px;
-                }
-                .totales .label {
-                  font-weight: normal;
-                }
-                .footer {
-                  text-align: center;
-                  font-size: 12px;
-                  color: #666;
-                  margin-top: 50px;
+                .shadow-md, .rounded-xl {
+                  box-shadow: none !important;
+                  border-radius: 0 !important;
                 }
               </style>
             </head>
             <body>
-              <div class="wrapper">
-                <h1>Distribuidora de Bebidas</h1>
-                <p class="subtitulo">Este documento no es válido como factura</p>
-                <div class="datos">
-                  <span>Fecha: ${new Date().toLocaleDateString()}</span>
-                  <span>Hora: ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} hs</span>
-                </div>
+              <div class="print-wrapper">
                 ${comprobanteRef.current.innerHTML}
-                <div class="footer">
-                  <p>Gracias por su compra</p>
-                  <p><strong>Sistema desarrollado por Bortiz Digital</strong></p>
+                <div class="text-center text-xs text-gray-500 mt-16">
+                  Sistema desarrollado por <strong>Bortiz Digital</strong>
                 </div>
               </div>
               <script>

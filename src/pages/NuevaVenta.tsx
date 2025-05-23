@@ -43,20 +43,18 @@ export function NuevaVenta() {
                   padding: 0;
                   margin: 0;
                 }
-                .no-print-shadow {
-                  box-shadow: none !important;
-                }
+                .no-shadow { box-shadow: none !important; }
               </style>
             </head>
             <body>
-              <main class="w-full px-12 pt-12">
-                <div class="text-black text-sm">
+              <div class="text-black text-sm w-full px-10 pt-0">
+                <div class="no-shadow">
                   ${comprobanteRef.current.innerHTML}
                 </div>
-                <div class="text-center text-xs text-gray-500 mt-16">
+                <div class="text-center text-xs text-gray-500 mt-12">
                   Sistema desarrollado por <strong>Bortiz Digital</strong>
                 </div>
-              </main>
+              </div>
               <script>
                 window.onload = function() {
                   window.print();

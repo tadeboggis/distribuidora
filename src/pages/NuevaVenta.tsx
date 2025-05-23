@@ -29,35 +29,26 @@ export function NuevaVenta() {
   const handlePrint = () => {
     if (comprobanteRef.current) {
       const printWindow = window.open('', '_blank', 'width=900,height=650')
-      const styles = Array.from(document.querySelectorAll('style')).map(s => s.innerHTML).join('\n')
 
       if (printWindow) {
         printWindow.document.write(`
           <html>
             <head>
               <title>Comprobante</title>
-              <style>${styles}</style>
+              <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
               <style>
                 @page { size: A4; margin: 25mm; }
-                html, body {
-                  margin: 0;
-                  padding: 0;
+                body {
                   background: white;
-                }
-                .print-wrapper {
-                  width: 800px;
-                  margin: 0 auto;
-                }
-                .shadow-md, .rounded-xl {
-                  box-shadow: none !important;
-                  border-radius: 0 !important;
+                  padding: 0;
+                  margin: 0;
                 }
               </style>
             </head>
             <body>
-              <div class="print-wrapper">
+              <div class="max-w-2xl mx-auto text-black text-sm">
                 ${comprobanteRef.current.innerHTML}
-                <div class="text-center text-xs text-gray-500 mt-16">
+                <div class="text-center text-xs text-gray-500 mt-12">
                   Sistema desarrollado por <strong>Bortiz Digital</strong>
                 </div>
               </div>

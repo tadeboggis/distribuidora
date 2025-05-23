@@ -11,21 +11,26 @@
   html {
     scroll-behavior: smooth;
   }
+
   body {
     @apply bg-gray-50 text-gray-800 antialiased font-sans;
     min-width: 320px;
     min-height: 100vh;
     margin: 0;
   }
+
   a {
     @apply text-accent hover:text-accent-dark no-underline underline-offset-2;
   }
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold text-primary;
   }
+
   button {
     @apply rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition;
   }
+
   input {
     @apply border rounded-lg p-3 focus:ring-accent focus:ring-2;
   }
@@ -33,38 +38,47 @@
 
 /* 4. Estilos para impresión */
 @media print {
-  body {
-    @apply bg-white text-black;
+  html, body {
+    background: white;
+    color: black;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-size: 13px;
+    font-family: sans-serif;
   }
 
-  /* Define área imprimible estilo A4 */
+  /* Área imprimible estilo A4 centrado */
   .print-a4 {
     width: 210mm;
     min-height: 297mm;
     padding: 20mm;
+    margin: 0 auto;
     background: white;
     page-break-after: always;
   }
 
-  /* NUEVA CLASE para centrar contenido impreso sin depender de Tailwind */
   .print-wrapper {
     width: 800px;
     margin: 0 auto;
     text-align: left;
   }
 
-  /* Oculta botones, headers, footers y cualquier acción */
+  /* Oculta todo lo innecesario en impresión */
   .no-print,
   header,
   footer,
+  nav,
   button {
     display: none !important;
   }
 
   a {
     text-decoration: underline;
+  }
+
+  /* Elimina márgenes internos/residuos */
+  * {
+    box-sizing: border-box;
   }
 }

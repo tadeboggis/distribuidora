@@ -92,7 +92,6 @@ export function NuevaVenta() {
     }
 
     document.addEventListener('visibilitychange', handleVisibility)
-
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility)
     }
@@ -100,12 +99,13 @@ export function NuevaVenta() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-12">
-      <div className="bg-white rounded-2xl shadow-lg p-8">
+      <div className="bg-white rounded-2xl shadow-lg p-8 no-print">
         <h1 className="text-4xl font-bold text-primary mb-6">Nueva Venta</h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="block text-lg font-medium mb-1">Código</label>
             <input
+              type="text"
               list="codigos"
               value={codigo}
               onChange={e => {
@@ -175,7 +175,7 @@ export function NuevaVenta() {
         </div>
       </div>
 
-      <div ref={comprobanteRef}>
+      <div ref={comprobanteRef} className="print-a4 print-wrapper">
         <VistaPreviaComprobante
           ref={comprobanteRef}
           items={items.map(i => ({

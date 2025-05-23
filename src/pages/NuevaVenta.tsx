@@ -51,7 +51,7 @@ export function NuevaVenta() {
                   display: flex;
                   justify-content: center;
                   align-items: center;
-                  padding: 40mm 20mm;
+                  padding: 30mm 20mm;
                   box-sizing: border-box;
                 }
 
@@ -62,8 +62,8 @@ export function NuevaVenta() {
                 }
 
                 h1 {
-                  font-size: 22px;
-                  margin-bottom: 5px;
+                  font-size: 24px;
+                  margin-bottom: 4px;
                   text-align: center;
                 }
 
@@ -71,44 +71,49 @@ export function NuevaVenta() {
                   font-size: 13px;
                   color: #666;
                   text-align: center;
-                  margin-bottom: 25px;
+                  margin-bottom: 20px;
                   font-style: italic;
                 }
 
                 .datos {
                   display: flex;
                   justify-content: space-between;
-                  margin-bottom: 10px;
+                  font-size: 13px;
+                  margin-bottom: 15px;
                 }
 
                 table {
                   width: 100%;
                   border-collapse: collapse;
-                  margin-bottom: 20px;
+                  margin-bottom: 30px;
                 }
 
                 th, td {
-                  border: 1px solid #000;
+                  border: 1px solid #ccc;
                   padding: 8px;
                   font-size: 13px;
+                  text-align: left;
                 }
 
                 th {
-                  background: #f5f5f5;
+                  background: #f2f2f2;
                 }
 
                 .totales {
+                  font-size: 16px;
+                  font-weight: bold;
                   display: flex;
                   justify-content: space-between;
-                  font-weight: bold;
-                  font-size: 15px;
+                  margin-top: 20px;
                   margin-bottom: 30px;
+                  padding-top: 10px;
+                  border-top: 2px solid #000;
                 }
 
                 .footer {
                   text-align: center;
                   font-size: 12px;
-                  color: #555;
+                  color: #444;
                 }
               </style>
             </head>

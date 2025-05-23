@@ -27,7 +27,34 @@ export function NuevaVenta() {
   const comprobanteRef = useRef<HTMLDivElement>(null)
 
   const handlePrint = () => {
-    window.print()
+    if (comprobanteRef.current) {
+      const printWindow = window.open('', '_blank', 'width=900,height=650')
+      const styles = Array.from(document.querySelectorAll('style')).map(s => s.innerHTML).join('\n')
+
+      if (printWindow) {
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>Comprobante</title>
+              <style>${styles}</style>
+              <style>
+                body { background: white; padding: 40px; font-family: sans-serif; font-size: 13px; }
+              </style>
+            </head>
+            <body>
+              ${comprobanteRef.current.innerHTML}
+              <script>
+                window.onload = function() {
+                  window.print();
+                  setTimeout(() => window.close(), 500);
+                }
+              </script>
+            </body>
+          </html>
+        `)
+        printWindow.document.close()
+      }
+    }
 
     if (items.length > 0) {
       const venta = {
@@ -75,6 +102,17 @@ export function NuevaVenta() {
     toast.success('Ítem agregado')
   }
 
+  const restaurarCatalogo = () => {
+    const ejemplo = [
+      { codigo: 'A001', nombre: 'Coca Cola 2L', precio: 400, stock: 10 },
+      { codigo: 'A002', nombre: 'Sprite 2L', precio: 380, stock: 15 },
+      { codigo: 'A003', nombre: 'Pepsi 2L', precio: 390, stock: 12 }
+    ]
+    localStorage.setItem('catalogo', JSON.stringify(ejemplo))
+    setCatalogo(ejemplo)
+    toast.success('Catálogo restaurado ✔️')
+  }
+
   useEffect(() => {
     const cargarCatalogo = () => {
       const stored = localStorage.getItem('catalogo')
@@ -101,6 +139,13 @@ export function NuevaVenta() {
     <div className="container mx-auto px-4 py-8 space-y-12">
       <div className="bg-white rounded-2xl shadow-lg p-8 no-print">
         <h1 className="text-4xl font-bold text-primary mb-6">Nueva Venta</h1>
+
+        {catalogo.length === 0 && (
+          <div className="mb-6">
+            <Button onClick={restaurarCatalogo}>Restaurar catálogo</Button>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="block text-lg font-medium mb-1">Código</label>
@@ -175,7 +220,7 @@ export function NuevaVenta() {
         </div>
       </div>
 
-      <div ref={comprobanteRef} className="print-a4 print-wrapper">
+      <div ref={comprobanteRef}>
         <VistaPreviaComprobante
           ref={comprobanteRef}
           items={items.map(i => ({

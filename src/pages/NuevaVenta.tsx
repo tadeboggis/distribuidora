@@ -64,8 +64,9 @@ export function NuevaVenta() {
                 .datos {
                   display: flex;
                   justify-content: space-between;
-                  font-size: 12px;
-                  margin-bottom: 20px;
+                  font-size: 13px;
+                  margin-bottom: 25px;
+                  font-weight: bold;
                 }
                 table {
                   width: 100%;
@@ -87,10 +88,12 @@ export function NuevaVenta() {
                   display: flex;
                   justify-content: space-between;
                   font-weight: bold;
-                  font-size: 18px;
+                  font-size: 16px;
                   margin-top: 40px;
-                  border-top: 2px solid #000;
-                  padding-top: 15px;
+                  padding-top: 10px;
+                }
+                .totales .label {
+                  font-weight: normal;
                 }
                 .footer {
                   text-align: center;
@@ -102,7 +105,17 @@ export function NuevaVenta() {
             </head>
             <body>
               <div class="wrapper">
+                <h1>Distribuidora de Bebidas</h1>
+                <p class="subtitulo">Este documento no es válido como factura</p>
+                <div class="datos">
+                  <span>Fecha: ${new Date().toLocaleDateString()}</span>
+                  <span>Hora: ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} hs</span>
+                </div>
                 ${comprobanteRef.current.innerHTML}
+                <div class="footer">
+                  <p>Gracias por su compra</p>
+                  <p><strong>Sistema desarrollado por Bortiz Digital</strong></p>
+                </div>
               </div>
               <script>
                 window.onload = function() {

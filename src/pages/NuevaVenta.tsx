@@ -38,11 +38,29 @@ export function NuevaVenta() {
               <title>Comprobante</title>
               <style>${styles}</style>
               <style>
-                body { background: white; padding: 40px; font-family: sans-serif; font-size: 13px; }
+                html, body {
+                  margin: 0;
+                  padding: 0;
+                  height: 100%;
+                  font-family: sans-serif;
+                  font-size: 13px;
+                  background: white;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                }
+                .comprobante-wrapper {
+                  width: 210mm;
+                  min-height: 297mm;
+                  padding: 30mm;
+                  box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.1);
+                }
               </style>
             </head>
             <body>
-              ${comprobanteRef.current.innerHTML}
+              <div class="comprobante-wrapper">
+                ${comprobanteRef.current.innerHTML}
+              </div>
               <script>
                 window.onload = function() {
                   window.print();
@@ -102,17 +120,6 @@ export function NuevaVenta() {
     toast.success('Ítem agregado')
   }
 
-  const restaurarCatalogo = () => {
-    const ejemplo = [
-      { codigo: 'A001', nombre: 'Coca Cola 2L', precio: 400, stock: 10 },
-      { codigo: 'A002', nombre: 'Sprite 2L', precio: 380, stock: 15 },
-      { codigo: 'A003', nombre: 'Pepsi 2L', precio: 390, stock: 12 }
-    ]
-    localStorage.setItem('catalogo', JSON.stringify(ejemplo))
-    setCatalogo(ejemplo)
-    toast.success('Catálogo restaurado ✔️')
-  }
-
   useEffect(() => {
     const cargarCatalogo = () => {
       const stored = localStorage.getItem('catalogo')
@@ -139,12 +146,6 @@ export function NuevaVenta() {
     <div className="container mx-auto px-4 py-8 space-y-12">
       <div className="bg-white rounded-2xl shadow-lg p-8 no-print">
         <h1 className="text-4xl font-bold text-primary mb-6">Nueva Venta</h1>
-
-        {catalogo.length === 0 && (
-          <div className="mb-6">
-            <Button onClick={restaurarCatalogo}>Restaurar catálogo</Button>
-          </div>
-        )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>

@@ -50,50 +50,53 @@ export function NuevaVenta() {
                   margin: 0 auto;
                 }
                 h1 {
-                  font-size: 22px;
+                  font-size: 24px;
                   text-align: center;
-                  margin: 0 0 6px 0;
+                  margin: 0 0 8px 0;
                 }
                 .subtitulo {
                   text-align: center;
                   font-size: 13px;
                   font-style: italic;
                   color: #666;
-                  margin-bottom: 20px;
+                  margin-bottom: 25px;
                 }
                 .datos {
                   display: flex;
                   justify-content: space-between;
                   font-size: 12px;
-                  margin-bottom: 10px;
+                  margin-bottom: 20px;
                 }
                 table {
                   width: 100%;
                   border-collapse: collapse;
-                  margin-bottom: 20px;
+                  margin-bottom: 30px;
                 }
                 th, td {
                   border: 1px solid #ccc;
-                  padding: 8px;
+                  padding: 10px;
                   font-size: 13px;
                 }
                 th {
-                  background: #f5f5f5;
+                  background: #f0f0f0;
+                }
+                tbody tr:not(:last-child) {
+                  border-bottom: 2px solid #eee;
                 }
                 .totales {
                   display: flex;
                   justify-content: space-between;
                   font-weight: bold;
-                  font-size: 16px;
-                  margin-top: 30px;
+                  font-size: 18px;
+                  margin-top: 40px;
                   border-top: 2px solid #000;
-                  padding-top: 10px;
+                  padding-top: 15px;
                 }
                 .footer {
                   text-align: center;
                   font-size: 12px;
                   color: #666;
-                  margin-top: 40px;
+                  margin-top: 50px;
                 }
               </style>
             </head>

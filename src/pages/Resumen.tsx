@@ -1,6 +1,6 @@
-// src/pages/Resumen.tsx
-
 import { useEffect, useState, useRef } from 'react'
+import { collection, getDocs, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore'
+import { db } from '../firebase/config'
 import { AlertTriangle } from 'lucide-react'
 
 interface Item {
@@ -11,7 +11,7 @@ interface Item {
 }
 
 interface Venta {
-  id: number
+  id: string
   fecha: string
   totalVenta: number
   totalBultos: number
@@ -28,10 +28,14 @@ export function Resumen() {
   const resumenRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const stored = localStorage.getItem('ventasDelDia')
-    const todasLasVentas: Venta[] = stored ? JSON.parse(stored) : []
-    const ordenadas = todasLasVentas.sort((a, b) => b.id - a.id)
-    setVentas(ordenadas)
+    const fetchVentas = async () => {
+      const q = query(collection(db, 'ventas'), orderBy('fecha', 'desc'))
+      const snapshot = await getDocs(q)
+      const data: Venta[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Venta))
+      setVentas(data)
+    }
+
+    fetchVentas()
   }, [])
 
   const confirmarEliminacion = (venta: Venta) => {
@@ -39,22 +43,17 @@ export function Resumen() {
     setMostrarModal(true)
   }
 
-  const eliminarVenta = () => {
+  const eliminarVenta = async () => {
     if (!ventaAEliminar) return
-    const nuevasVentas = ventas.filter(v => v.id !== ventaAEliminar.id)
-    setVentas(nuevasVentas)
-    localStorage.setItem('ventasDelDia', JSON.stringify(nuevasVentas))
+    await deleteDoc(doc(db, 'ventas', ventaAEliminar.id))
+    setVentas(ventas.filter(v => v.id !== ventaAEliminar.id))
     setMostrarModal(false)
     setVentaAEliminar(null)
   }
 
   const ventasFiltradasPorFecha = ventas
-    .filter(v => {
-      const fechaVenta = new Date(v.fecha)
-      const fechaLocal = new Date(fechaVenta.getTime() - fechaVenta.getTimezoneOffset() * 60000)
-      return fechaLocal.toISOString().startsWith(fechaSeleccionada)
-    })
-    .sort((a, b) => b.id - a.id)
+    .filter(v => v.fecha.startsWith(fechaSeleccionada))
+    .sort((a, b) => b.fecha.localeCompare(a.fecha))
 
   const ventasFiltradasFinal = ventasFiltradasPorFecha.filter((venta, idx) => {
     if (!filtroComprobante) return true
@@ -176,9 +175,8 @@ export function Resumen() {
 
         {ventasFiltradasFinal.length > 0 ? (
           <div className="space-y-6">
-            {ventasFiltradasFinal.map((venta) => {
-              const indexEnLista = ventasFiltradasPorFecha.findIndex(v => v.id === venta.id)
-              const numeroComprobante = ventasFiltradasPorFecha.length - indexEnLista
+            {ventasFiltradasFinal.map((venta, idx) => {
+              const numeroComprobante = ventasFiltradasPorFecha.length - idx
               return (
                 <div key={venta.id} className="bg-white p-6 rounded-xl shadow-md space-y-3">
                   <div className="flex justify-between items-center">

@@ -1,4 +1,4 @@
-// src/app.tsx
+// src/App.tsx
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Layout } from './components/Layout'
@@ -6,6 +6,7 @@ import { NuevaVenta } from './pages/NuevaVenta'
 import { Productos } from './pages/Productos'
 import { Resumen } from './pages/Resumen'
 import { Login } from './pages/Login'
+import { cerrarSesion as cerrarSesionFirebase } from './utils/logout'
 
 export default function App() {
   const [logueado, setLogueado] = useState(false)
@@ -14,8 +15,8 @@ export default function App() {
     setLogueado(localStorage.getItem('logueado') === 'true')
   }, [])
 
-  const cerrarSesion = () => {
-    localStorage.removeItem('logueado')
+  const cerrarSesion = async () => {
+    await cerrarSesionFirebase()
     setLogueado(false)
   }
 

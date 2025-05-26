@@ -1,20 +1,17 @@
 // src/pages/Productos.tsx
 
 import { useState, useEffect } from 'react'
-import type { Product } from '../mockdata/products'
-import { products as initialProducts } from '../mockdata/products'
+import { collection, doc, getDocs, setDoc, deleteDoc } from 'firebase/firestore'
+import { db } from '../firebase/config'
 import { Button } from '../components/Button'
 import toast from 'react-hot-toast'
 
-const STORAGE_KEY = 'catalogo'
-
-function loadCatalogo(): Product[] {
-  const saved = localStorage.getItem(STORAGE_KEY)
-  return saved ? JSON.parse(saved) : initialProducts
-}
-
-function saveCatalogo(data: Product[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+interface Product {
+  codigo: string
+  nombre: string
+  precio: number
+  stock: number
+  stockMinimo: number
 }
 
 export function Productos() {
@@ -27,7 +24,12 @@ export function Productos() {
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    setCatalogo(loadCatalogo())
+    async function fetchData() {
+      const querySnapshot = await getDocs(collection(db, 'catalogo'))
+      const data = querySnapshot.docs.map(doc => doc.data() as Product)
+      setCatalogo(data)
+    }
+    fetchData()
   }, [])
 
   const filtered = catalogo.filter(p =>
@@ -35,7 +37,7 @@ export function Productos() {
     p.nombre.toLowerCase().includes(search.toLowerCase())
   )
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const numPrecio = Number(precio)
     const numStock = Number(stock)
     const numStockMin = Number(stockMinimo)
@@ -45,16 +47,18 @@ export function Productos() {
       return
     }
 
-    const exists = catalogo.find(p => p.codigo === codigo)
-    const updated = exists
-      ? catalogo.map(p =>
-          p.codigo === codigo ? { ...p, nombre, precio: numPrecio, stock: numStock, stockMinimo: numStockMin } : p
-        )
-      : [...catalogo, { codigo, nombre, precio: numPrecio, stock: numStock, stockMinimo: numStockMin }]
+    const product: Product = {
+      codigo,
+      nombre,
+      precio: numPrecio,
+      stock: numStock,
+      stockMinimo: numStockMin
+    }
 
-    setCatalogo(updated)
-    saveCatalogo(updated)
-    toast.success(exists ? 'Producto actualizado' : 'Producto agregado')
+    await setDoc(doc(db, 'catalogo', codigo), product)
+    const nuevos = catalogo.filter(p => p.codigo !== codigo)
+    setCatalogo([...nuevos, product])
+    toast.success('Producto guardado')
     setCodigo('')
     setNombre('')
     setPrecio('')
@@ -62,19 +66,19 @@ export function Productos() {
     setStockMinimo('1')
   }
 
-  const handleDelete = (code: string) => {
-    const filteredList = catalogo.filter(p => p.codigo !== code)
-    setCatalogo(filteredList)
-    saveCatalogo(filteredList)
+  const handleDelete = async (code: string) => {
+    await deleteDoc(doc(db, 'catalogo', code))
+    const nuevos = catalogo.filter(p => p.codigo !== code)
+    setCatalogo(nuevos)
     toast('Producto eliminado', { icon: '🗑️' })
   }
 
-  const updateField = (codigo: string, key: keyof Product, value: number) => {
-    const updated = catalogo.map(p =>
-      p.codigo === codigo ? { ...p, [key]: value } : p
-    )
-    setCatalogo(updated)
-    saveCatalogo(updated)
+  const updateField = async (codigo: string, key: keyof Product, value: number) => {
+    const producto = catalogo.find(p => p.codigo === codigo)
+    if (!producto) return
+    const actualizado = { ...producto, [key]: value }
+    await setDoc(doc(db, 'catalogo', codigo), actualizado)
+    setCatalogo(catalogo.map(p => p.codigo === codigo ? actualizado : p))
   }
 
   const hayBajoStock = catalogo.some(p => p.stock <= p.stockMinimo)

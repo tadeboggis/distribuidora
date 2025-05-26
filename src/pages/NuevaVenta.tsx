@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Button } from '../components/Button'
 import { VistaPreviaComprobante } from '../components/VistaPreviaComprobante'
+import { db } from '../firebase/config'
+import { collection, addDoc, getDocs, updateDoc, doc } from 'firebase/firestore'
 
 interface Item {
   codigo: string
@@ -16,17 +18,14 @@ export function NuevaVenta() {
   const [nombre, setNombre] = useState('')
   const [bultos, setBultos] = useState(1)
   const [precio, setPrecio] = useState(0)
-  const [catalogo, setCatalogo] = useState(() => {
-    const stored = localStorage.getItem('catalogo')
-    return stored ? JSON.parse(stored) : []
-  })
+  const [catalogo, setCatalogo] = useState<any[]>([])
 
   const totalBultos = items.reduce((sum, i) => sum + i.bultos, 0)
   const totalVenta = items.reduce((sum, i) => sum + i.precio * i.bultos, 0)
 
   const comprobanteRef = useRef<HTMLDivElement>(null)
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     if (comprobanteRef.current) {
       const printWindow = window.open('', '_blank', 'width=900,height=650')
 
@@ -71,34 +70,31 @@ export function NuevaVenta() {
 
     if (items.length > 0) {
       const venta = {
-        id: Date.now(),
         fecha: new Date().toISOString(),
         totalVenta,
         totalBultos,
         items,
       }
 
-      const ventasGuardadas = JSON.parse(localStorage.getItem('ventasDelDia') || '[]')
-      localStorage.setItem('ventasDelDia', JSON.stringify([...ventasGuardadas, venta]))
+      try {
+        await addDoc(collection(db, 'ventas'), venta)
 
-      const storedCatalog = localStorage.getItem('catalogo')
-      if (storedCatalog) {
-        const catalog = JSON.parse(storedCatalog)
-        const updatedCatalog = catalog.map((product: any) => {
-          const item = items.find(i => i.codigo === product.codigo)
-          if (item) {
-            return {
-              ...product,
-              stock: Math.max((product.stock || 0) - item.bultos, 0)
+        for (const item of items) {
+          const querySnapshot = await getDocs(collection(db, 'catalogo'))
+          querySnapshot.forEach(async docSnap => {
+            if (docSnap.data().codigo === item.codigo) {
+              const newStock = Math.max((docSnap.data().stock || 0) - item.bultos, 0)
+              await updateDoc(doc(db, 'catalogo', docSnap.id), { stock: newStock })
             }
-          }
-          return product
-        })
-        localStorage.setItem('catalogo', JSON.stringify(updatedCatalog))
-      }
+          })
+        }
 
-      toast.success('Venta registrada e impresa ✔️')
-      setItems([])
+        toast.success('Venta registrada e impresa ✔️')
+        setItems([])
+      } catch (error) {
+        console.error('Error al guardar la venta:', error)
+        toast.error('Error al guardar la venta')
+      }
     }
   }
 
@@ -115,22 +111,24 @@ export function NuevaVenta() {
     toast.success('Ítem agregado')
   }
 
-  useEffect(() => {
-    const cargarCatalogo = () => {
-      const stored = localStorage.getItem('catalogo')
-      if (stored) {
-        setCatalogo(JSON.parse(stored))
-      }
+  const cargarCatalogo = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'catalogo'))
+      const productos: any[] = []
+      querySnapshot.forEach(doc => productos.push(doc.data()))
+      setCatalogo(productos)
+    } catch (error) {
+      console.error('Error al cargar catálogo:', error)
     }
+  }
 
+  useEffect(() => {
     cargarCatalogo()
-
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         cargarCatalogo()
       }
     }
-
     document.addEventListener('visibilitychange', handleVisibility)
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility)
@@ -219,10 +217,7 @@ export function NuevaVenta() {
       <div ref={comprobanteRef}>
         <VistaPreviaComprobante
           ref={comprobanteRef}
-          items={items.map(i => ({
-            ...i,
-            cantidad: i.bultos
-          }))}
+          items={items.map(i => ({ ...i, cantidad: i.bultos }))}
         />
       </div>
 

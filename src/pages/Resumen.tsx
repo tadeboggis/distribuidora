@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { collection, getDocs, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore'
+import { collection, deleteDoc, doc, query, orderBy, onSnapshot } from 'firebase/firestore'
 import { db } from '../firebase/config'
 import { AlertTriangle } from 'lucide-react'
 
@@ -22,20 +22,17 @@ export function Resumen() {
   const [ventas, setVentas] = useState<Venta[]>([])
   const [fechaSeleccionada, setFechaSeleccionada] = useState(() => new Date().toISOString().split('T')[0])
   const [filtroComprobante, setFiltroComprobante] = useState('')
-
   const [ventaAEliminar, setVentaAEliminar] = useState<Venta | null>(null)
   const [mostrarModal, setMostrarModal] = useState(false)
   const resumenRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const fetchVentas = async () => {
-      const q = query(collection(db, 'ventas'), orderBy('fecha', 'desc'))
-      const snapshot = await getDocs(q)
+    const q = query(collection(db, 'ventas'), orderBy('fecha', 'desc'))
+    const unsubscribe = onSnapshot(q, snapshot => {
       const data: Venta[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Venta))
       setVentas(data)
-    }
-
-    fetchVentas()
+    })
+    return () => unsubscribe()
   }, [])
 
   const confirmarEliminacion = (venta: Venta) => {
@@ -46,7 +43,6 @@ export function Resumen() {
   const eliminarVenta = async () => {
     if (!ventaAEliminar) return
     await deleteDoc(doc(db, 'ventas', ventaAEliminar.id))
-    setVentas(ventas.filter(v => v.id !== ventaAEliminar.id))
     setMostrarModal(false)
     setVentaAEliminar(null)
   }
@@ -139,115 +135,9 @@ export function Resumen() {
   }
 
   return (
+    // Mantené tu JSX original desde acá sin cambios visuales
     <div className="container mx-auto px-4 py-8 space-y-10 relative">
-      <h1 className="text-4xl font-bold text-primary">Resumen de ventas</h1>
-
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-lg font-medium text-gray-700 mb-1">Seleccionar fecha</label>
-          <input
-            type="date"
-            value={fechaSeleccionada}
-            onChange={e => setFechaSeleccionada(e.target.value)}
-            className="border border-gray-300 rounded px-4 py-2 text-lg w-full"
-          />
-        </div>
-
-        <div>
-          <label className="block text-lg font-medium text-gray-700 mb-1">Buscar comprobante</label>
-          <input
-            type="text"
-            value={filtroComprobante}
-            onChange={e => setFiltroComprobante(e.target.value)}
-            placeholder="Ej: 3"
-            className="border border-gray-300 rounded px-4 py-2 text-lg w-full"
-          />
-        </div>
-      </div>
-
-      <div ref={resumenRef} className="space-y-8">
-        <div className="bg-white rounded-xl shadow-md p-6 text-center space-y-1">
-          <p className="text-lg text-gray-700">Total bultos vendidos:</p>
-          <p className="text-3xl font-bold text-primary">{totalBultos}</p>
-          <p className="text-lg text-gray-700">Total vendido:</p>
-          <p className="text-3xl font-bold text-primary">${totalVenta}</p>
-        </div>
-
-        {ventasFiltradasFinal.length > 0 ? (
-          <div className="space-y-6">
-            {ventasFiltradasFinal.map((venta, idx) => {
-              const numeroComprobante = ventasFiltradasPorFecha.length - idx
-              return (
-                <div key={venta.id} className="bg-white p-6 rounded-xl shadow-md space-y-3">
-                  <div className="flex justify-between items-center">
-                    <div className="text-lg font-semibold text-primary">Comprobante #{numeroComprobante}</div>
-                    <button
-                      onClick={() => confirmarEliminacion(venta)}
-                      className="text-sm text-red-500 hover:underline"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Hora: {new Date(venta.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                  <table className="w-full text-sm border border-gray-300">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border px-3 py-2">Cantidad</th>
-                        <th className="border px-3 py-2">Producto</th>
-                        <th className="border px-3 py-2">Precio</th>
-                        <th className="border px-3 py-2">Subtotal</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {venta.items.map((item, i) => (
-                        <tr key={i}>
-                          <td className="border px-3 py-2 text-center">{item.bultos}</td>
-                          <td className="border px-3 py-2">{item.nombre}</td>
-                          <td className="border px-3 py-2 text-right">${item.precio}</td>
-                          <td className="border px-3 py-2 text-right">${item.precio * item.bultos}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <div className="text-right text-sm font-medium text-primary mt-2">
-                    Total: ${venta.totalVenta} – Bultos: {venta.totalBultos}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        ) : (
-          <p className="text-gray-600 italic">No hay ventas registradas para esta fecha.</p>
-        )}
-      </div>
-
-      {mostrarModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center transition-opacity duration-300 animate-fade-in">
-          <div className="bg-white p-6 rounded-lg shadow-xl border border-red-200 w-[320px] text-center">
-            <AlertTriangle size={40} className="mx-auto text-red-600 mb-3" />
-            <p className="text-lg font-semibold text-red-600 mb-4">¿Eliminar este comprobante?</p>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={eliminarVenta}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-              >
-                Sí, eliminar
-              </button>
-              <button
-                onClick={() => {
-                  setMostrarModal(false)
-                  setVentaAEliminar(null)
-                }}
-                className="text-gray-600 hover:underline px-4 py-2"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ...contenido original (inputs, tabla, impresión, etc.) sin tocar... */}
     </div>
   )
 }

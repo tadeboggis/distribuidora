@@ -1,7 +1,7 @@
-// src/pages/Productos.tsx
+// ✅ Reemplazo optimizado de Productos.tsx con onSnapshot
 
 import { useState, useEffect } from 'react'
-import { collection, doc, getDocs, setDoc, deleteDoc } from 'firebase/firestore'
+import { collection, doc, onSnapshot, setDoc, deleteDoc } from 'firebase/firestore'
 import { db } from '../firebase/config'
 import { Button } from '../components/Button'
 import toast from 'react-hot-toast'
@@ -24,12 +24,11 @@ export function Productos() {
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    async function fetchData() {
-      const querySnapshot = await getDocs(collection(db, 'catalogo'))
-      const data = querySnapshot.docs.map(doc => doc.data() as Product)
+    const unsubscribe = onSnapshot(collection(db, 'catalogo'), snapshot => {
+      const data = snapshot.docs.map(doc => doc.data() as Product)
       setCatalogo(data)
-    }
-    fetchData()
+    })
+    return () => unsubscribe()
   }, [])
 
   const filtered = catalogo.filter(p =>
@@ -56,8 +55,6 @@ export function Productos() {
     }
 
     await setDoc(doc(db, 'catalogo', codigo), product)
-    const nuevos = catalogo.filter(p => p.codigo !== codigo)
-    setCatalogo([...nuevos, product])
     toast.success('Producto guardado')
     setCodigo('')
     setNombre('')
@@ -68,8 +65,6 @@ export function Productos() {
 
   const handleDelete = async (code: string) => {
     await deleteDoc(doc(db, 'catalogo', code))
-    const nuevos = catalogo.filter(p => p.codigo !== code)
-    setCatalogo(nuevos)
     toast('Producto eliminado', { icon: '🗑️' })
   }
 
@@ -78,7 +73,6 @@ export function Productos() {
     if (!producto) return
     const actualizado = { ...producto, [key]: value }
     await setDoc(doc(db, 'catalogo', codigo), actualizado)
-    setCatalogo(catalogo.map(p => p.codigo === codigo ? actualizado : p))
   }
 
   const hayBajoStock = catalogo.some(p => p.stock <= p.stockMinimo)

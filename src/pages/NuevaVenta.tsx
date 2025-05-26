@@ -3,7 +3,7 @@ import toast from 'react-hot-toast'
 import { Button } from '../components/Button'
 import { VistaPreviaComprobante } from '../components/VistaPreviaComprobante'
 import { db } from '../firebase/config'
-import { collection, addDoc, getDocs, updateDoc, doc } from 'firebase/firestore'
+import { collection, addDoc, updateDoc, doc, onSnapshot } from 'firebase/firestore'
 
 interface Item {
   codigo: string
@@ -28,7 +28,6 @@ export function NuevaVenta() {
   const handlePrint = async () => {
     if (comprobanteRef.current) {
       const printWindow = window.open('', '_blank', 'width=900,height=650')
-
       if (printWindow) {
         printWindow.document.write(`
           <html>
@@ -80,13 +79,11 @@ export function NuevaVenta() {
         await addDoc(collection(db, 'ventas'), venta)
 
         for (const item of items) {
-          const querySnapshot = await getDocs(collection(db, 'catalogo'))
-          querySnapshot.forEach(async docSnap => {
-            if (docSnap.data().codigo === item.codigo) {
-              const newStock = Math.max((docSnap.data().stock || 0) - item.bultos, 0)
-              await updateDoc(doc(db, 'catalogo', docSnap.id), { stock: newStock })
-            }
-          })
+          const producto = catalogo.find(p => p.codigo === item.codigo)
+          if (producto) {
+            const newStock = Math.max((producto.stock || 0) - item.bultos, 0)
+            await updateDoc(doc(db, 'catalogo', item.codigo), { stock: newStock })
+          }
         }
 
         toast.success('Venta registrada e impresa ✔️')
@@ -111,28 +108,12 @@ export function NuevaVenta() {
     toast.success('Ítem agregado')
   }
 
-  const cargarCatalogo = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, 'catalogo'))
-      const productos: any[] = []
-      querySnapshot.forEach(doc => productos.push(doc.data()))
-      setCatalogo(productos)
-    } catch (error) {
-      console.error('Error al cargar catálogo:', error)
-    }
-  }
-
   useEffect(() => {
-    cargarCatalogo()
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        cargarCatalogo()
-      }
-    }
-    document.addEventListener('visibilitychange', handleVisibility)
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibility)
-    }
+    const unsubscribe = onSnapshot(collection(db, 'catalogo'), snapshot => {
+      const productos: any[] = snapshot.docs.map(doc => doc.data())
+      setCatalogo(productos)
+    })
+    return () => unsubscribe()
   }, [])
 
   return (

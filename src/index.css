@@ -48,23 +48,25 @@
     font-family: sans-serif;
   }
 
-  /* Área imprimible estilo A4 centrado */
+  /* Área imprimible sin márgenes internos ni centrado */
   .print-a4 {
-    width: 210mm;
-    min-height: 297mm;
-    padding: 20mm;
-    margin: 0 auto;
+    width: 100%;
+    min-height: 100%;
+    padding: 0;
+    margin: 0;
     background: white;
     page-break-after: always;
   }
 
+  /* Wrapper sin restricciones para impresión */
   .print-wrapper {
-    width: 800px;
-    margin: 0 auto;
+    width: auto;
+    margin: 0;
+    padding: 0;
     text-align: left;
   }
 
-  /* Oculta todo lo innecesario en impresión */
+  /* Oculta lo no relevante */
   .no-print,
   header,
   footer,
@@ -77,8 +79,24 @@
     text-decoration: underline;
   }
 
-  /* Elimina márgenes internos/residuos */
   * {
-    box-sizing: border-box;
+    box-sizing: border-box !important;
+  }
+
+  /* Elimina sombras */
+  .shadow,
+  .shadow-md,
+  .shadow-lg,
+  .shadow-xl {
+    box-shadow: none !important;
+  }
+
+  /* Elimina bordes redondeados */
+  .rounded,
+  .rounded-md,
+  .rounded-lg,
+  .rounded-xl,
+  .rounded-2xl {
+    border-radius: 0 !important;
   }
 }

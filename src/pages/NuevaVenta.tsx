@@ -39,27 +39,28 @@ export function NuevaVenta() {
               <style>
                 @page { size: A4; margin: 25mm; }
                 html, body {
-                  background: white;
                   padding: 0;
                   margin: 0;
+                  background: white;
+                  font-size: 14px;
+                  font-family: sans-serif;
+                  color: black;
                 }
-                .no-shadow { box-shadow: none !important; }
+                .no-shadow * {
+                  box-shadow: none !important;
+                  border-radius: 0 !important;
+                }
               </style>
             </head>
             <body>
-              <div class="text-black text-sm w-full px-10 pt-0">
-                <div class="no-shadow">
-                  ${comprobanteRef.current.innerHTML}
-                </div>
-                <div class="text-center text-xs text-gray-500 mt-12">
-                  Sistema desarrollado por <strong>Bortiz Digital</strong>
-                </div>
+              <div class="no-shadow">
+                ${comprobanteRef.current.innerHTML}
               </div>
               <script>
                 window.onload = function() {
                   window.print();
                   setTimeout(() => window.close(), 500);
-                }
+                };
               </script>
             </body>
           </html>

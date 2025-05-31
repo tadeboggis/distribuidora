@@ -1,9 +1,16 @@
+// src/pages/NuevaVenta.tsx
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Button } from '../components/Button'
 import { VistaPreviaComprobante } from '../components/VistaPreviaComprobante'
 import { db } from '../firebase/config'
-import { collection, addDoc, updateDoc, doc, onSnapshot } from 'firebase/firestore'
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  onSnapshot
+} from 'firebase/firestore'
 
 interface Item {
   codigo: string
@@ -26,6 +33,7 @@ export function NuevaVenta() {
   const comprobanteRef = useRef<HTMLDivElement>(null)
 
   const handlePrint = async () => {
+    /* ───────────── IMPRIME ───────────── */
     if (comprobanteRef.current) {
       const printWindow = window.open('', '_blank', 'width=900,height=650')
       if (printWindow) {
@@ -36,29 +44,14 @@ export function NuevaVenta() {
               <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
               <style>
                 @page { size: A4; margin: 25mm; }
-                html, body {
-                  padding: 0;
-                  margin: 0;
-                  background: white;
-                  font-size: 14px;
-                  font-family: sans-serif;
-                  color: black;
-                }
-                .no-shadow * {
-                  box-shadow: none !important;
-                  border-radius: 0 !important;
-                }
+                html, body { padding:0;margin:0;background:#fff;font-size:14px;font-family:sans-serif;color:#000 }
+                .no-shadow * { box-shadow:none!important;border-radius:0!important }
               </style>
             </head>
             <body>
-              <div class="no-shadow">
-                ${comprobanteRef.current.innerHTML}
-              </div>
+              <div class="no-shadow">${comprobanteRef.current.innerHTML}</div>
               <script>
-                window.onload = function() {
-                  window.print();
-                  setTimeout(() => window.close(), 500);
-                };
+                window.onload = () => { window.print(); setTimeout(() => window.close(), 500) }
               </script>
             </body>
           </html>
@@ -67,34 +60,46 @@ export function NuevaVenta() {
       }
     }
 
-    if (items.length > 0) {
-      const venta = {
-        fecha: new Date().toISOString(),
-        totalVenta,
-        totalBultos,
-        items,
-      }
+    /* ───────────── GUARDA VENTA + ACTUALIZA STOCK ───────────── */
+    if (items.length === 0) return
 
-      try {
-        await addDoc(collection(db, 'ventas'), venta)
+    const ahora = new Date()
+    const venta = {
+      /* fecha en formato YYYY-MM-DD que espera Resumen */
+      fecha: ahora.toLocaleDateString('en-CA', {
+        timeZone: 'America/Argentina/Buenos_Aires'
+      }),
+      /* hora HH:MM (24 h) para mostrar en el comprobante del Resumen */
+      hora: ahora.toLocaleTimeString('es-AR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      totalVenta,
+      totalBultos,
+      items
+    }
 
-        for (const item of items) {
-          const producto = catalogo.find(p => p.codigo === item.codigo)
-          if (producto) {
-            const newStock = Math.max((producto.stock || 0) - item.bultos, 0)
-            await updateDoc(doc(db, 'catalogo', item.codigo), { stock: newStock })
-          }
+    try {
+      await addDoc(collection(db, 'ventas'), venta)
+
+      // descuenta stock de cada producto
+      for (const it of items) {
+        const prod = catalogo.find((p: any) => p.codigo === it.codigo)
+        if (prod) {
+          const nuevoStock = Math.max((prod.stock ?? 0) - it.bultos, 0)
+          await updateDoc(doc(db, 'catalogo', prod.codigo), { stock: nuevoStock })
         }
-
-        toast.success('Venta registrada e impresa ✔️')
-        setItems([])
-      } catch (error) {
-        console.error('Error al guardar la venta:', error)
-        toast.error('Error al guardar la venta')
       }
+
+      toast.success('Venta registrada e impresa ✔️')
+      setItems([])
+    } catch (err) {
+      console.error('Error al guardar la venta:', err)
+      toast.error('Error al guardar la venta')
     }
   }
 
+  /* ───────────── AGREGA ITEM ───────────── */
   const agregarItem = () => {
     if (!codigo || !nombre || precio <= 0 || bultos <= 0) {
       toast.error('Completa todos los campos para agregar ítem')
@@ -108,14 +113,15 @@ export function NuevaVenta() {
     toast.success('Ítem agregado')
   }
 
+  /* ───────────── CARGA CATÁLOGO EN TIEMPO REAL ───────────── */
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'catalogo'), snapshot => {
-      const productos: any[] = snapshot.docs.map(doc => doc.data())
-      setCatalogo(productos)
+    const unsub = onSnapshot(collection(db, 'catalogo'), snap => {
+      setCatalogo(snap.docs.map(d => d.data()))
     })
-    return () => unsubscribe()
+    return unsub
   }, [])
 
+  /* ───────────── UI ───────────── */
   return (
     <div className="container mx-auto px-4 py-8 space-y-12">
       <div className="bg-white rounded-2xl shadow-lg p-8 no-print">
@@ -176,7 +182,9 @@ export function NuevaVenta() {
               />
             </div>
             <div>
-              <label className="block text-lg font-medium mb-1">P. Unit. ($)</label>
+              <label className="block text-lg font-medium mb-1">
+                P. Unit. ($)
+              </label>
               <input
                 type="number"
                 value={precio}
@@ -195,10 +203,11 @@ export function NuevaVenta() {
         </div>
       </div>
 
+      {/* comprobante */}
       <div ref={comprobanteRef}>
         <VistaPreviaComprobante
           ref={comprobanteRef}
-          items={items.map(i => ({ ...i, cantidad: i.bultos }))}
+          items={items.map(it => ({ ...it, cantidad: it.bultos }))}
         />
       </div>
 

@@ -1,24 +1,30 @@
 // src/App.tsx
-import { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { Layout } from './components/Layout'
-import { NuevaVenta } from './pages/NuevaVenta'
-import { Productos } from './pages/Productos'
-import { Resumen } from './pages/Resumen'
-import { Login } from './pages/Login'
-import { cerrarSesion as cerrarSesionFirebase } from './utils/logout'
+import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+
+import { auth }          from "./firebase/config";      // ← cambio
+import { Layout }        from "./components/Layout";    // ← cambio
+import { NuevaVenta }    from "./pages/NuevaVenta";     // ← cambio
+import { Productos }     from "./pages/Productos";      // ← cambio
+import { Resumen }       from "./pages/Resumen";        // ← cambio
+import { Login }         from "./pages/Login";          // ← cambio
 
 export default function App() {
-  const [logueado, setLogueado] = useState(false)
+  const [logueado, setLogueado] = useState(false);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    setLogueado(localStorage.getItem('logueado') === 'true')
-  }, [])
+    const unsub = onAuthStateChanged(auth, user => {
+      setLogueado(!!user);
+      setChecking(false);
+    });
+    return unsub;
+  }, []);
 
-  const cerrarSesion = async () => {
-    await cerrarSesionFirebase()
-    setLogueado(false)
-  }
+  const cerrarSesion = () => signOut(auth);
+
+  if (checking) return <div className="p-8 text-xl">Cargando…</div>;
 
   return (
     <BrowserRouter>
@@ -27,13 +33,13 @@ export default function App() {
           <Routes>
             <Route index element={<Navigate to="/nueva-venta" replace />} />
             <Route path="/nueva-venta" element={<NuevaVenta />} />
-            <Route path="/productos" element={<Productos />} />
-            <Route path="/resumen" element={<Resumen />} />
+            <Route path="/productos"  element={<Productos />} />
+            <Route path="/resumen"    element={<Resumen />} />
           </Routes>
         </Layout>
       ) : (
         <Login onLogin={() => setLogueado(true)} />
       )}
     </BrowserRouter>
-  )
+  );
 }
